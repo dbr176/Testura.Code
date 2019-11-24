@@ -152,6 +152,54 @@ namespace Testura.Code.Builders
             return method;
         }
 
+        public ConstructorDeclarationSyntax BuildAsConstructor()
+        {
+            var ctor = BuildConstructorBase();
+            ctor = BuildConstructorModifiers(ctor);
+            ctor = BuildAttributes(ctor);
+            ctor = BuildXmlComments(ctor);
+            ctor = BuildParameters(ctor);
+            ctor = BuildBody(ctor);
+            return ctor;
+        }
+
+        public ConstructorDeclarationSyntax BuildConstructorBase()
+        {
+            return ConstructorDeclaration(Identifier(_name));
+        }
+
+        private ConstructorDeclarationSyntax BuildAttributes(ConstructorDeclarationSyntax method)
+        {
+            return !_attributes.Any() ? method : method.WithAttributeLists(_attributes);
+        }
+
+        private ConstructorDeclarationSyntax BuildParameters(ConstructorDeclarationSyntax method)
+        {
+            return !_parameters.Any() ? method : method.WithParameterList(ParameterGenerator.ConvertParameterSyntaxToList(_parameters.ToArray()));
+        }
+
+        private ConstructorDeclarationSyntax BuildBody(ConstructorDeclarationSyntax method)
+        {
+            if (_body == null)
+            {
+                return method.WithSemicolonToken(Token(SyntaxKind.SemicolonToken));
+            }
+
+            return method.WithBody(_body);
+        }
+
+
+        private ConstructorDeclarationSyntax BuildConstructorModifiers(ConstructorDeclarationSyntax method)
+        {
+            if (_modifiers == null || !_modifiers.Any())
+            {
+                return method;
+            }
+
+            return method.WithModifiers(ModifierGenerator.Create(_modifiers.ToArray()));
+        }
+
+
         private MethodDeclarationSyntax BuildMethodBase()
         {
             if (_returnType != null)
@@ -176,7 +224,8 @@ namespace Testura.Code.Builders
             return method.WithModifiers(ModifierGenerator.Create(_modifiers.ToArray()));
         }
 
-        private MethodDeclarationSyntax BuildXmlComments(MethodDeclarationSyntax method)
+        private T BuildXmlComments<T>(T method)
+            where T : MemberDeclarationSyntax
         {
             if (string.IsNullOrEmpty(_summary))
             {
