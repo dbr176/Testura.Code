@@ -86,6 +86,16 @@ namespace Testura.Code.Statements
             return IfStatement(binaryExpression.GetBinaryExpression(),  block);
         }
 
+        public StatementSyntax If(ExpressionSyntax expression, BlockSyntax block)
+        {
+            if (expression == null)
+            {
+                throw new ArgumentNullException(nameof(expression));
+            }
+
+            return IfStatement(expression, block);
+        }
+
         /// <summary>
         /// Create the statement syntax for a if-conditional with a single statement.
         /// </summary>
